@@ -1,3 +1,6 @@
 [submodule "git-tools"]
 	path = git-tools
 	url = git@github.com:jfly/git-tools.git
+[submodule "youtube-downloader"]
+	path = youtube-downloader
+	url = git@github.com:jfly/youtube-downloader.git

@@ -1,4 +1,4 @@
-all: git-hooks webroot/swf/HTTPGet.swf
+all: git-hooks
 
 run: all
 	( cd webroot; python -m SimpleHTTPServer )
@@ -14,7 +14,3 @@ git-hooks:
 
 clean:
 	rm -rf webroot/swf
-
-
-webroot/swf/HTTPGet.swf: src/HTTPGet.as
-	mxmlc -benchmark=True -creator=jfly -static-link-runtime-shared-libraries=true -output=$@ $^
