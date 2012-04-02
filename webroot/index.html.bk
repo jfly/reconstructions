@@ -1,0 +1,38 @@
+<html>
+<head>
+<script src="js/mootools-core-1.4.5-full-nocompat.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+var foo = function(bar) {
+    console.log(bar);
+}
+window.addEvent('load', function(e) {
+    var swf = new Swiff('swf/HTTPGet.swf', {
+      width: 400,
+      height: 400 
+    });
+    document.body.appendChild(swf.object);
+     
+    var button = document.getElementById('urlSubmit');
+    var youtubeId = document.getElementById('youtubeId');
+    button.addEvent('click', function(e) {
+        var url = 'http://youtube.com?v='+ youtubeId.value;
+        var rawHtml = swf.object.get(url, 'foo');
+        var rawHtmlDiv = document.getElementById('rawHtml');
+        rawHtmlDiv.empty();
+        rawHtmlDiv.appendText(rawHtml);
+        
+    });
+});
+</script>
+</head>
+<body>
+Hello, world!
+<div>
+    <input type='text' id='youtubeId' value='i3WvrO1c50M'></input>
+    <input type='button' id='urlSubmit' value='Get Url'></input>
+    <div id='rawHtml'>
+    </div>
+</div>
+</body>
+</html>

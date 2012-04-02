@@ -1,0 +1,70 @@
+<html>
+<head>
+<script src="js/mootools-core-1.4.5-full-nocompat.js" type="text/javascript"></script>
+<script src="js/youtube-downloader.js" type="text/javascript"></script>
+<script src="js/mootools-more-1.4.0.1.js" type="text/javascript"></script>
+<script>
+// copied from http://www.massive-interactive.nl/html5_video/smpte_test_universal.html
+var url = window.location.search;
+function seekFrames(nr_of_frames, fps) {
+	var video = document.getElementById('video');
+	var div_seekInfo = document.getElementById('seekInfo');
+
+	if (video.paused == false) {
+		video.pause();
+	}
+
+	var currentFrames = Math.round(video.currentTime * fps); 
+	var newPos = (currentFrames + nr_of_frames) / fps;
+
+	//var newPos = video.currentTime += 1/fps;
+	//newPos = Math.round(newPos, 2) + 1/fps; 
+
+	var str_seekInfo = "seeking to (fixed): <b>" + newPos + "</b><br/>";
+	video.currentTime = newPos; // TELL THE PLAYER TO GO HERE
+	str_seekInfo += "seek done, got: " + video.currentTime + "<br/>";
+	var seek_error = newPos - video.currentTime;
+	str_seekInfo += "seek error: " + seek_error + "<br/>";
+
+	div_seekInfo.innerHTML = str_seekInfo;
+
+}
+
+window.addEventListener('load', function() {
+	var FPS = 25; // TODO - where the heck should this come from?!
+    var myURI = new URI(window.location.href);
+    var videoUrlBlob =  myURI.get('data');
+    var parsedVideoObj = JSON.parse(videoUrlBlob['videos']);
+    var pickedVideoUrl = parsedVideoObj[Object.keys(parsedVideoObj)[0]];
+    var video = document.getElementById('video');
+    video.src = pickedVideoUrl;
+	window.addEventListener('keydown', function(e) {
+		var keyCode = e.keyCode;
+		if(keyCode == 39) {
+			// right arrow
+			seekFrames(1, FPS);
+		} else if(keyCode == 37) {
+			// left arrow
+			seekFrames(-1, FPS);
+		} else if(keyCode == 32) {
+			// spacebar
+			if(video.paused) {
+				video.play();
+			} else {
+				video.pause();
+			}
+		}
+	}, false);
+}, false);
+</script>
+</head>
+<body>
+
+<video id="video" controls>
+<source src="http://api.viglink.com/api/click?format=go&key=9b4efad421c8b103b2c94b796db973b0&loc=http%3A%2F%2Fsaveyoutube.com%2Fwatch%3Fv%3Dtx0JhDxPa8c%26feature%3Dg-upl%26context%3DG2173315AUAAAAAAAAAA&subId=c72ca2419551cdd184e3f01a5453d8b6&v=1&libid=1333275144960&out=http%3A%2F%2Fo-o.preferred.comcast-lax1.v4.nonxt3.c.youtube.com%2Fvideoplayback%3Fupn%3DMTIwNjUyNDE5OTAxMzE0Mzc3MzU%26sparams%3Dcp%252Cid%252Cip%252Cipbits%252Citag%252Cratebypass%252Csource%252Cupn%252Cexpire%26fexp%3D903103%252C916003%252C913102%26itag%3D37%26ip%3D24.0.0.0%26signature%3D28C4B9B6DF42FA3E9174975ADDAE82CCDFFDA738.B1D7D59317C29BCB612944FD6EA7CAE130A9578B%26sver%3D3%26ratebypass%3Dyes%26source%3Dyoutube%26expire%3D1333300139%26key%3Dyt1%26ipbits%3D8%26cp%3DU0hSSFNLTl9IU0NOMl9LRVJCOjdWeFV6UHhqVnFW%26id%3Db71d09843c4f6bc7%26title%3DTwo%2520Men.%2520One%2520Jar%2520of%2520Nutella%2520%5BSaveYouTube.com%5D&title=Two%20Men.%20One%20Jar%20of%20Nutella&txt=Download%20MP4&jsonp=vglnk_jsonp_13332751762441" type="video/mp4">
+</video>
+
+<div id="seekInfo"></div>
+
+</body>
+</html>
