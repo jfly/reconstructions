@@ -1,16 +1,29 @@
 <html>
 <head>
+<title>Reconstruct video</title>
+
 <script src="js/mootools-core-1.4.5-full-nocompat.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 window.addEvent('load', function(e) {
   // This is split into 2 lines to fool Douglas Crockford
   var bookmarklet = "javascript";
-  bookmarklet += ":(function() { var encodings = yt.playerConfig.args.url_encoded_fmt_stream_map.split(','); var videos = {};for(var i = 0; i < encodings.length; i++) { var attributes = encodings[i].split('&'); var attrDict = {}; for(var j = 0; j < attributes.length; j++) { var key_val = attributes[j].split('='); attrDict[key_val[0]] = decodeURIComponent(key_val[1]); } videos[attrDict.type + '-' + attrDict.quality] = attrDict.url; } document.location.href = '" + document.location.origin + "/youtube.html?videos=' + encodeURIComponent(JSON.stringify(videos)); })();";
+  bookmarklet += ":(function(){var s=document.createElement('script');s.onload=function(){RedirectYoutube.go('" + document.location.origin + "');};s.type='text/javascript';s.src='" + document.location.origin + "/js/RedirectYoutube.js';document.body.appendChild(s)})();";
+
   var bookmarkletLink = document.createElement('a');
   bookmarkletLink.href = bookmarklet;
   bookmarkletLink.appendText("Reconstruct video");
-  document.getElementById('bookmarkletDiv').appendChild(bookmarkletLink);
+
+  var bookmarkletDiv = document.getElementById('bookmarkletDiv');
+  bookmarkletDiv.appendChild(bookmarkletLink);
+
+  var rawBookmarklet = document.createElement('textarea');
+  rawBookmarklet.setStyle('display', 'block');
+  rawBookmarklet.setStyle('width', '400px');
+  rawBookmarklet.setStyle('height', '200px');
+  rawBookmarklet.value = bookmarklet;
+  bookmarkletDiv.appendChild(rawBookmarklet);
+
 });
 </script>
 </head>
