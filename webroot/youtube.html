@@ -4,11 +4,13 @@
 <script src="js/youtube-downloader.js" type="text/javascript"></script>
 <script src="js/mootools-more-1.4.0.1.js" type="text/javascript"></script>
 <script>
+
+( function() {
+
 // copied from http://www.massive-interactive.nl/html5_video/smpte_test_universal.html
 var url = window.location.search;
 function seekFrames(nr_of_frames, fps) {
 	var video = document.getElementById('video');
-	var div_seekInfo = document.getElementById('seekInfo');
 
 	if (video.paused === false) {
 		video.pause();
@@ -25,32 +27,119 @@ function seekFrames(nr_of_frames, fps) {
 	str_seekInfo += "seek done, got: " + video.currentTime + "\n";
 	var seek_error = newPos - video.currentTime;
 	str_seekInfo += "seek error: " + seek_error + "\n";
-
-  div_seekInfo.empty();
-  div_seekInfo.appendText(str_seekInfo);
 }
 
+function videoStateChanged() {
+  var video = document.getElementById('video');
+  var playing = !video.paused;
+  var currentTime = video.currentTime;
+}
+
+function snapshot() {
+  if(seeking) {
+    return;
+  }
+  var scaleFactor = 0.25;
+  var w = video.videoWidth * scaleFactor;
+  var h = video.videoHeight * scaleFactor;
+  var canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  var ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, w, h); 
+  document.body.appendChild(canvas);
+}
+
+function loaded() {
+  resizeVideo();
+}
+
+function resizeVideo() {
+  var availSpace = document.body.getSize();
+  var margin = document.body.getStyle('margin').toInt();
+  availSpace.x -= margin*2;
+  availSpace.x -= 18;// TODO - vertical scrollbar!
+  availSpace.y -= margin*2;
+
+  // ideal size
+  var w1 = video.videoWidth;
+  var h1 = video.videoHeight;
+
+  // restrict by available height
+  var h2 = availSpace.y;
+  var w2 = (w1/h1)*h2;
+
+  // restrict by available width
+  var w3 = availSpace.x;
+  var h3 = (h1/w1)*w3;
+
+  var w = Math.min(w1, w2, w3);
+  var h = Math.min(h1, h2, h3);
+  video.width = w;
+  video.height = h;
+}
+
+var video = null;
+var seeking = false;
 window.addEventListener('load', function() {
 	var FPS = 25; // TODO - where the heck should this come from?!
-    var myURI = new URI(window.location.href);
-    var videoUrlBlob =  myURI.get('data');
-    var parsedVideoObj = JSON.parse(videoUrlBlob.videos);
-    var pickedVideoUrl = parsedVideoObj[Object.keys(parsedVideoObj)[0]];
-    var video = document.getElementById('video');
-    video.src = pickedVideoUrl;
+  var myURI = new URI(window.location.href);
+  var videoUrl = "";
+  var videoUrlBlob =  myURI.get('data');
+
+  var parsedVideoObj = null;
+  try {
+    parsedVideoObj = JSON.parse(videoUrlBlob.videos);
+  } catch(e) {
+    alert("Invalid videos url parameter: " + videoUrlBlob.videos + "\n" + e);
+    return;
+  }
+  if(typeof(parsedVideoObj) == "string") {
+    videoUrl = parsedVideoObj;
+  } else if(typeof(parsedVideoObj) == "object") {
+    var videoKey = Object.keys(parsedVideoObj)[0];
+    videoUrl = parsedVideoObj[videoKey];
+  } else {
+    alert("videos url parameter must be a string or a dict: " + videoUrlBlob.videos + ".");
+    return;
+  }
+
+  video = document.getElementById('video');
+  // TODO - auto size the video
+  videoUrl = "file:///home/jeremy/gitting/reconstructions/webroot/Paycheck.2003.720p.BrRip.x264.YIFY.mp4";
+  video.src = videoUrl;
+  video.addEventListener('timeupdate', function(e) {
+    videoStateChanged();
+  }, false);
 	window.addEventListener('keydown', function(e) {
 		var keyCode = e.keyCode;
 		if(keyCode == 39) { // right arrow
 			seekFrames(1, FPS);
+      e.preventDefault();
 		} else if(keyCode == 37) { // left arrow
 			seekFrames(-1, FPS);
+      e.preventDefault();
 		} else if(keyCode == 32) { // spacebar
 			if(video.paused) {
 				video.play();
 			} else {
 				video.pause();
 			}
-		}
+      videoStateChanged();
+      e.preventDefault();
+		} else if(keyCode == 80) { // p
+      snapshot();
+    }
+
+    // TODO - larger seek increments
+    // TODO - insert turn
+    // reposition/resize turn
+    // delete/edit turn
+    // can turns overlap??
+    // TODO - annotations? cross/f2l 1,2,3,4/oll/pll
+    // TODO - mirroring?
+    // TODO - playback speed?
+    // TODO - playback turn by turn
 	}, false);
 
   var rightFrame = document.getElementById("rightFrame");
@@ -61,14 +150,26 @@ window.addEventListener('load', function() {
   leftFrame.addEvent('click', function(e) {
     seekFrames(-1, FPS);
   });
+
+  window.addEvent('resize', resizeVideo);
+
+  //TODO doesn't work? video.addEventListener('load', loaded, false);
+  video.addEventListener('canplaythrough', loaded, false);
+
+  video.addEventListener('seeking', function(e) {
+    seeking = true;
+  }, false);
+  video.addEventListener('seeked', function(e) {
+    seeking = false;
+  }, false);
 }, false);
+
+})();
 </script>
 </head>
 <body>
 
-<video id="video" controls>
-<source src="" type="video/mp4">
-</source>
+<video id="video">
 </video>
 
 <div>
@@ -76,7 +177,7 @@ window.addEventListener('load', function() {
 <input type="button" value=">>" id="rightFrame" />
 </div>
 
-<div id="seekInfo"></div>
+<div id="timeline"></div>
 
 </body>
 </html>
