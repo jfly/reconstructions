@@ -8,7 +8,8 @@
 window.addEvent('load', function(e) {
   // This is split into 2 lines to fool Douglas Crockford
   var bookmarklet = "javascript";
-  bookmarklet += ":(function(){var s=document.createElement('script');s.onload=function(){RedirectYoutube.go('" + document.location.origin + "');};s.type='text/javascript';s.src='" + document.location.origin + "/js/RedirectYoutube.js';document.body.appendChild(s)})();";
+  var root = document.location.href.substring(0, document.location.href.lastIndexOf('/'));
+  bookmarklet += ":(function(){var s=document.createElement('script');s.onload=function(){RedirectYoutube.go('" + root + "');};s.type='text/javascript';s.src='" + root + "/js/RedirectYoutube.js';document.body.appendChild(s)})();";
 
   var bookmarkletLink = document.createElement('a');
   bookmarkletLink.href = bookmarklet;
