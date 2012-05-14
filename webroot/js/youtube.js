@@ -63,9 +63,11 @@ var timelinePos;
 var timeline;
 function loaded() {
   timelineArea = document.getElementById('timelineArea');
-  timeline = document.createElement('div');
-  timeline.addClass('timeline');
-  timelineArea.appendChild(timeline);
+  if(!timeline) {
+    timeline = document.createElement('div');
+    timeline.addClass('timeline');
+    timelineArea.appendChild(timeline);
+  }
 
   function eToSeconds(e) {
     var x = e.page.x - 8 + timelineArea.scrollLeft;
@@ -183,19 +185,26 @@ window.addEventListener('load', function() {
     alert("Invalid videos url parameter: " + videoUrlBlob.videos + "\n" + e);
     return;
   }
-  if(typeof(parsedVideoObj) == "string") {
-    videoUrl = parsedVideoObj;
-  } else if(typeof(parsedVideoObj) == "object") {
-    var videoKey = Object.keys(parsedVideoObj)[0];
-    videoUrl = parsedVideoObj[videoKey];
-  } else {
+  if(typeof parsedVideoObj != "object") {
     alert("videos url parameter must be a string or a dict: " + videoUrlBlob.videos + ".");
     return;
   }
 
+  var videoSelector = document.getElementById('videoQualitySelector');
+  for (var key in parsedVideoObj) {
+    if (parsedVideoObj.hasOwnProperty(key)) {
+        var option = new Option(key, parsedVideoObj[key]);
+        videoSelector.appendChild(option);
+    }
+  }
+
   video = document.getElementById('video');
-  video.src = videoUrl;
-  video.addEventListener('timeupdate', function(e) {
+  var pickVideoQuality = function (e) {
+    video.src = videoSelector.value;
+  };
+  pickVideoQuality();
+  videoSelector.addEvent('change', pickVideoQuality);
+    video.addEventListener('timeupdate', function(e) {
     videoStateChanged();
   }, false);
 	window.addEventListener('keydown', function(e) {
