@@ -50,7 +50,6 @@ app.configure('production', function(){
 
 app.get('/getSomething', function(req, res){
     youtube.insert({a:2}, function(err, docs) {
-        console.log(err);
         res.send('jeremy sucks' + err);
     });
 });
