@@ -49,8 +49,9 @@ app.configure('production', function(){
 });
 
 app.get('/getSomething', function(req, res){
-    youtube.insert({a:2}, function(err, docs) {
-        res.send('jeremy sucks' + err);
+    youtube.insert({a:2}, {safe: true}, function(err, docs) {
+        console.log(" docs : " + JSON.stringify(docs));
+        res.send('jeremy sucks' + err + JSON.stringify(docs));
     });
 });
 
