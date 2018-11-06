@@ -1,1 +1,0 @@
-../../youtube-downloader/js/swfobject.js
